@@ -1,22 +1,32 @@
-import { getSortedPostsData } from "@/lib/posts";
+import getFormattedDate from "@/lib/getFormattedDate";
+import { getPostData, getSortedPostsData } from "@/lib/posts";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export function generatedMetadata({ params }: { params: { postId: string } }) {
-  const posts = getSortedPostsData();
-  const { postId } = params;
+// export function geratedStaticParams() {
+//   const posts = getSortedPostsData();
 
-  const post = posts.find((post) => post.id === postId);
+//   return posts.map((post) => ({
+//     postId: post.id,
+//   }));
+// }
 
-  if (!post) {
-    return {
-      title: "Post Not Found",
-    };
-  }
+// export function generatedMetadata({ params }: { params: { postId: string } }) {
+//   const posts = getSortedPostsData();
+//   const { postId } = params;
 
-  return {
-    title: post.title,
-  };
-}
+//   const post = posts.find((post) => post.id === postId);
+
+//   if (!post) {
+//     return {
+//       title: "Post Not Found",
+//     };
+//   }
+
+//   return {
+//     title: post.title,
+//   };
+// }
 
 export default async function Post({ params }: { params: { postId: string } }) {
   const posts = getSortedPostsData();
@@ -26,5 +36,19 @@ export default async function Post({ params }: { params: { postId: string } }) {
     return notFound();
   }
 
-  return <div>page</div>;
+  const { title, date, contentHtml } = await getPostData(postId);
+  const pubDate = getFormattedDate(date);
+
+  return (
+    <main className="px-6 mx-audo">
+      <h1 className="text-3xl mt-4 mb-0">{title}</h1>
+      <p className="mt-0">{pubDate}</p>
+      <article>
+        <section dangerouslySetInnerHTML={{ __html: contentHtml }} />
+        <p>
+          <Link href={"/"}> Back to home</Link>
+        </p>
+      </article>
+    </main>
+  );
 }
